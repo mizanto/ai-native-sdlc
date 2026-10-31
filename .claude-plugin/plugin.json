@@ -1,0 +1,11 @@
+{
+  "name": "ai-native-sdlc",
+  "version": "0.1.0",
+  "description": "Anthropic's AI-Native SDLC playbook as slash commands: each stage (intent, spec, plan, build, verify, review, maintain) writes a versioned markdown artifact that the next stage gates on.",
+  "author": {
+    "name": "Sergey Bendak",
+    "email": "sleepoke@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": ["sdlc", "spec-driven", "workflow", "planning", "review"]
+}

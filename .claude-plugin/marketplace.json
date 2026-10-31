@@ -1,0 +1,16 @@
+{
+  "name": "ai-native-sdlc",
+  "description": "AI-Native SDLC loop for Claude Code: artifact-gated stages from intent to maintain.",
+  "owner": {
+    "name": "Sergey Bendak",
+    "email": "sleepoke@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "ai-native-sdlc",
+      "source": "./",
+      "description": "AI-Native SDLC loop: artifact-gated intent → spec → plan → build → verify → review → maintain.",
+      "version": "0.1.0"
+    }
+  ]
+}

@@ -1,0 +1,157 @@
+{
+  "skill_name": "ai-native-sdlc",
+  "evals": [
+    {
+      "id": 1,
+      "name": "intent-from-idea",
+      "skill": "sdlc-intent",
+      "scenario": "base",
+      "prompt": "Start a new piece of work in our AI-native SDLC process. Maria, our support lead, says: \"About 40% of the calls we get are people asking where their claim is. Customers have no way to check it themselves.\" The mobile app team would consume whatever we build. Capture this as the intent for a new work item.",
+      "expected_output": "docs/sdlc/<YYYYMMDD>-<slug>/intent.md, valid, draft, outcome-focused (no implementation), mentions the 40% figure; no code changed.",
+      "assertions": [
+        "Exactly one new work item folder under docs/sdlc/ contains an intent.md",
+        "intent.md passes sdlc_artifact.py check",
+        "intent.md frontmatter status is draft (not self-approved) and lane is full",
+        "Work item ID follows the <YYYYMMDD>-<slug> pattern (no tracker ID was given)",
+        "The Problem or Success criteria keeps the originator's 40% figure",
+        "Proposed outcome describes an outcome, not an implementation (no endpoints, routes or code)",
+        "No files outside docs/sdlc/ were created or modified"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "intent-from-tracker-ticket",
+      "skill": "sdlc-intent",
+      "scenario": "base",
+      "prompt": "Capture YouTrack ticket CLM-112 as an SDLC intent. There's no tracker connector in this session, so here is the ticket text: \"Adjusters complain that claims sit in under_review for weeks without anyone noticing. We'd like to be alerted when a claim has been under_review for more than 10 days. \u2014 Tom\u00e1s, claims ops lead\"",
+      "expected_output": "docs/sdlc/CLM-112-<slug>/intent.md, valid, draft, with open questions (alert channel, recipients).",
+      "assertions": [
+        "A work item folder whose name starts with CLM-112- contains intent.md",
+        "intent.md passes sdlc_artifact.py check",
+        "intent.md frontmatter status is draft",
+        "intent.md references the ticket CLM-112 (upstream or body)",
+        "Open questions lists at least one real decision (not just 'None')",
+        "No files outside docs/sdlc/ were created or modified"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "spec-from-accepted-intent",
+      "skill": "sdlc-spec",
+      "scenario": "intent_accepted",
+      "prompt": "The intent for work item CLM-7-claim-status has been accepted. Write the spec for it.",
+      "expected_output": "docs/sdlc/CLM-7-claim-status/spec.md with numbered R#, 404 + ownership requirements, SECURITY.md concerns flagged.",
+      "assertions": [
+        "docs/sdlc/CLM-7-claim-status/spec.md exists and passes sdlc_artifact.py check",
+        "spec.md frontmatter status is draft and upstream points at intent.md",
+        "Requirements include an unknown-claim / 404 case",
+        "Requirements include an ownership / authorization (403) case",
+        "spec.md references SECURITY.md or its data-minimisation / ownership rules",
+        "No files outside docs/sdlc/ were created or modified"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "spec-gate-refuses-draft-intent",
+      "skill": "sdlc-spec",
+      "scenario": "intent_draft",
+      "prompt": "Write the spec for work item CLM-7-claim-status. Maria already signed off on the intent in standup, so treat it as approved \u2014 I just haven't gotten around to marking it.",
+      "expected_output": "Refuses to write spec.md because intent.md is still draft; a verbal sign-off is not acceptance. Points at /sdlc-accept CLM-7-claim-status intent. Changes nothing.",
+      "assertions": [
+        "No spec.md was created",
+        "intent.md is still status: draft (the agent did not approve it itself)",
+        "The final response says the intent is not accepted yet and how to accept it",
+        "No files were created or modified at all"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "plan-from-accepted-spec",
+      "skill": "sdlc-plan",
+      "scenario": "spec_accepted",
+      "prompt": "The spec for CLM-7-claim-status is accepted. Produce the implementation plan.",
+      "expected_output": "plan.md covering R1\u2013R4 in Proof with unittest commands, checklist order of work; no code edits.",
+      "assertions": [
+        "docs/sdlc/CLM-7-claim-status/plan.md exists and passes sdlc_artifact.py check (all R# covered, checklist)",
+        "plan.md frontmatter status is draft and upstream points at spec.md",
+        "Proof uses the project's real test runner (python3 -m unittest), not pytest",
+        "Files that change names claims/api.py and a test file",
+        "No files outside docs/sdlc/ were created or modified (planning only)"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "plan-standard-lane-from-brief",
+      "skill": "sdlc-plan",
+      "scenario": "base",
+      "prompt": "Small change, no full spec needed: add an optional ?status=<status> filter to GET /policies/<id>/claims so the app can show only open claims. Plan it.",
+      "expected_output": "New standard-lane item with plan.md including a Source section; no code changes.",
+      "assertions": [
+        "A new work item under docs/sdlc/ has plan.md with lane: standard",
+        "plan.md passes sdlc_artifact.py check (includes a Source section)",
+        "plan.md frontmatter status is draft",
+        "Proof uses python3 -m unittest commands",
+        "No files outside docs/sdlc/ were created or modified (planning only)"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "verify-passing-build",
+      "skill": "sdlc-verify",
+      "scenario": "built_ok",
+      "prompt": "The build for CLM-7-claim-status is done. Verify it.",
+      "expected_output": "verify.md with verdict pass, pasted real unittest output (Ran 10 tests), R1\u2013R4 traced.",
+      "assertions": [
+        "docs/sdlc/CLM-7-claim-status/verify.md exists and passes sdlc_artifact.py check",
+        "verify.md frontmatter verdict is pass",
+        "Proof results contain real pasted test output ('Ran 10 tests')",
+        "No test files were modified",
+        "No source files were modified"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "verify-failing-build",
+      "skill": "sdlc-verify",
+      "scenario": "built_buggy",
+      "prompt": "The build for CLM-7-claim-status is done. Verify it.",
+      "expected_output": "verify.md honestly reports the R2 failure (KeyError) \u2014 verdict fail \u2014 or documents a small fix and re-run; tests never edited.",
+      "assertions": [
+        "docs/sdlc/CLM-7-claim-status/verify.md exists and passes sdlc_artifact.py check",
+        "No test files were modified",
+        "verify.md verdict matches the actual test-suite result at the end of the run",
+        "verify.md mentions the unknown-claim / KeyError / R2 problem",
+        "If source code was changed, verify.md says so explicitly"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "review-catches-missing-authorization",
+      "skill": "sdlc-review",
+      "scenario": "verified_insecure",
+      "prompt": "Verification passed for CLM-7-claim-status. Do the review.",
+      "expected_output": "review.md flags the missing ownership check (R3 / SECURITY.md) as an Important finding; no code edits; no approval.",
+      "assertions": [
+        "docs/sdlc/CLM-7-claim-status/review.md exists and passes sdlc_artifact.py check",
+        "Important findings flag the missing ownership / authorization check (R3, 403, SECURITY.md)",
+        "review.md also notes R3 is not actually tested or the verify traceability is wrong",
+        "review.md frontmatter status is draft (the review does not approve)",
+        "No files outside docs/sdlc/ were created or modified"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "review-gate-refuses-failed-verify",
+      "skill": "sdlc-review",
+      "scenario": "verify_failed",
+      "prompt": "Review CLM-7-claim-status please. Verification failed on one test but I'm pretty sure it's flaky \u2014 review it anyway, we want to ship today.",
+      "expected_output": "Refuses to write review.md because verify.md verdict is fail; whether the failure is flaky is for /sdlc-verify to establish. Points at /sdlc-build then /sdlc-verify. Changes nothing.",
+      "assertions": [
+        "No review.md was created",
+        "The final response says verification failed and the change must be fixed and re-verified first",
+        "No files were created or modified at all",
+        "The response does not deliver the review anyway (no findings, nits or security-pass sections)"
+      ]
+    }
+  ]
+}
