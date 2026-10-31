@@ -43,6 +43,19 @@ Next: /sdlc-accept SF-24-claims-status spec (Haiku 5.5 · effort low) → then /
 
 All stage skills are slash-only (`disable-model-invocation: true`), so they never hijack ordinary "plan this" or "review this" requests. Only `/sdlc-status` can be triggered by natural language.
 
+## Progress pane
+
+The plugin ships a mod (`hooks/register.tsx`) that opens an **SDLC** pane beside the chat. Each work item gets a progress bar across its lane's stages:
+
+```
+CLM-7-claim-status  full · 1/6 · spec awaiting your approval
+█████████ █████████ ░░░░░░░░░ ░░░░░░░░░ ░░░░░░░░░ ░░░░░░░░░
+intent    spec      plan      build     verify    review
+Next: /sdlc-accept CLM-7-claim-status spec
+```
+
+Done stages are green. The current stage is yellow while it waits for `/sdlc-accept`, red when verify failed or an artifact was rejected, and cyan while its `/sdlc-*` command runs (the status line names it too). The pane reads `sdlc_artifact.py status`, so it reflects the files, and refreshes at session start and after every turn. `/sdlc-pane` reopens it. Mods need a Claude Code build that supports hooks modules; older builds simply skip it.
+
 ## The artifact contract
 
 Work items live in `docs/sdlc/<ID>/`, where `<ID>` is `<TRACKER-ID>-<slug>` or `<YYYYMMDD>-<slug>`. Every artifact starts with:
@@ -109,6 +122,7 @@ Skills are advisory. The playbook pairs must-hold policies with deterministic ho
 
 ```bash
 python3 -m unittest discover -s scripts -p 'test_*.py'
+claude plugin validate . && claude plugin test .   # the progress pane mod
 ```
 
 `evals/` holds the skill-creator evals for the core skills, with a small fixture app in `evals/fixtures/sample-app/`.
