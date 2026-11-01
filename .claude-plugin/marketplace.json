@@ -10,7 +10,7 @@
       "name": "ai-native-sdlc",
       "source": "./",
       "description": "AI-Native SDLC loop: artifact-gated intent → spec → plan → build → verify → review → maintain.",
-      "version": "0.1.0"
+      "version": "0.1.1"
     }
   ]
 }
